@@ -200,6 +200,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Video Demo */}
+      <section className="max-w-3xl mx-auto px-6 pb-16">
+        <p className="fade-in text-center text-emerald-500 text-xs tracking-widest uppercase mb-3">
+          See it in action
+        </p>
+        <h2 className="fade-in fade-in-delay-1 text-center text-3xl font-medium text-slate-100 mb-3">
+          Watch how it works
+        </h2>
+        <p className="fade-in fade-in-delay-2 text-center text-slate-500 text-sm mb-8">
+          A quick walkthrough of the full app experience.
+        </p>
+        <div className="fade-in fade-in-delay-3 rounded-2xl overflow-hidden border border-gray-800" style={{ aspectRatio: '16/9' }}>
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/kNPkZpyQyFk"
+            title="Amanat App Demo"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </section>
+
       {/* Shariah Section */}
       <section className="max-w-5xl mx-auto px-6 pb-16">
         <div className="fade-in bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col sm:flex-row gap-8 items-center">
