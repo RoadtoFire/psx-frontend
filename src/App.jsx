@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import LandingPage from './pages/LandingPage'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
@@ -19,6 +20,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <PWAInstallPrompt />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -28,21 +30,21 @@ function App() {
             <Dashboard />
           </ProtectedRoute>
         } />
-      <Route path="/portfolio" element={
-        <ProtectedRoute>
-          <Portfolio />
-        </ProtectedRoute>
-      } />
-      <Route path="/dividends" element={
-        <ProtectedRoute>
-          <Dividends />
-        </ProtectedRoute>
-      } />
-      <Route path="/stocks" element={
-        <ProtectedRoute>
-          <Stocks />
-        </ProtectedRoute>
-      } />
+        <Route path="/portfolio" element={
+          <ProtectedRoute>
+            <Portfolio />
+          </ProtectedRoute>
+        } />
+        <Route path="/dividends" element={
+          <ProtectedRoute>
+            <Dividends />
+          </ProtectedRoute>
+        } />
+        <Route path="/stocks" element={
+          <ProtectedRoute>
+            <Stocks />
+          </ProtectedRoute>
+        } />
         <Route path="/learn" element={
           <ProtectedRoute>
             <Learn />
@@ -53,7 +55,7 @@ function App() {
             <Profile />
           </ProtectedRoute>
         } />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   )
