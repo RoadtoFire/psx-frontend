@@ -9,6 +9,11 @@ export const login = async (email, password) => {
 
 export const register = async (data) => {
   const res = await api.post('/api/v1/auth/register/', data)
+  // Save tokens immediately after registration
+  if (res.data.access) {
+    localStorage.setItem('access_token', res.data.access)
+    localStorage.setItem('refresh_token', res.data.refresh)
+  }
   return res.data
 }
 
