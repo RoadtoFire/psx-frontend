@@ -9,32 +9,6 @@ export function AuthProvider({ children }) {
 
 
   useEffect(() => {
-  const token = localStorage.getItem('access_token')
-  console.log('token on mount:', token)
-  if (token) {
-    getProfile()
-      .then((u) => { console.log('profile:', u); setUser(u) })
-      .catch((e) => { console.log('profile error:', e.response?.status) })
-      .finally(() => setLoading(false))
-  } else {
-    setLoading(false)
-  }
-}, [])
-return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
-      {!loading && children}
-    </AuthContext.Provider>
-  )
-}
-
-
-
-
-
-
-
-{/*
-  useEffect(() => {
     const token = localStorage.getItem('access_token')
     if (token) {
       getProfile()
@@ -48,6 +22,9 @@ return (
       setTimeout(() => setLoading(false), 0)
     }
   }, [])
-
-  
-*/}
+return (
+    <AuthContext.Provider value={{ user, setUser, loading }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  )
+}
