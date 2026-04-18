@@ -7,6 +7,13 @@
 
 ---
 
+## 🎥 Application Walkthrough
+
+[![Amanat Walkthrough](https://img.youtube.com/vi/kNPkZpyQyFk/maxresdefault.jpg)](https://youtu.be/kNPkZpyQyFk)
+*(Click the image above to view the full dashboard and dividend UI walkthrough)*
+
+---
+
 ## What is Amanat?
 
 Amanat (امانت — Urdu for *trust* and *safekeeping*) is a free portfolio tracker built specifically for Pakistani Muslim investors who want to invest in the Pakistan Stock Exchange while staying Shariah compliant.
@@ -88,25 +95,25 @@ No spreadsheets. No manual calculations. Just add your transactions and Amanat h
 
 ## API
 
-ull Swagger documentation available at:
+Full Swagger documentation available at:
 https://trustworthy-spontaneity-production-61c4.up.railway.app/api/docs/
 
-Key endpoints:
-POST /api/v1/auth/register/
-POST /api/v1/auth/login/
-GET  /api/v1/stocks/
-GET  /api/v1/stocks/{symbol}/
-GET  /api/v1/portfolio/value/
-GET  /api/v1/portfolio/dividends/
-POST /api/v1/portfolio/purification/mark/
+**Key endpoints:**
+`POST /api/v1/auth/register/`
+`POST /api/v1/auth/login/`
+`GET  /api/v1/stocks/`
+`GET  /api/v1/stocks/{symbol}/`
+`GET  /api/v1/portfolio/value/`
+`GET  /api/v1/portfolio/dividends/`
+`POST /api/v1/portfolio/purification/mark/`
 
 ---
 
 ## Local Development
 
 ### Backend
-```bash
-git clone https://github.com/RoadtoFire/psx-api
+\```bash
+git clone [https://github.com/RoadtoFire/psx-api](https://github.com/RoadtoFire/psx-api)
 cd psx-api
 python -m venv venv
 source venv/bin/activate
@@ -114,16 +121,16 @@ pip install -r requirements.txt
 cp .env.example .env  # configure your environment
 python manage.py migrate
 python manage.py runserver
-```
+\```
 
 ### Frontend
-```bash
-git clone https://github.com/RoadtoFire/psx-frontend
+\```bash
+git clone [https://github.com/RoadtoFire/psx-frontend](https://github.com/RoadtoFire/psx-frontend)
 cd psx-frontend
 npm install
 cp .env.example .env.local  # set VITE_API_URL
 npm run dev
-```
+\```
 
 ---
 
@@ -165,6 +172,3 @@ Amanat is a personal finance tool. It does not provide investment advice. Always
 Built by **Jawwad Ahmed** as a CS50 final project.
 
 *"Amanat — because your wealth is a trust."*
-
-
-Full Swagger documentation available at:
