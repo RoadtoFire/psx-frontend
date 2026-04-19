@@ -1,3 +1,6 @@
+// AI tools (Claude/ChatGPT) were used to assist with boilerplate
+// and code generation throughout this project.
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import LandingPage from './pages/LandingPage'
