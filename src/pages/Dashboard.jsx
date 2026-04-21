@@ -10,7 +10,7 @@ function BagIcon({ size = 20 }) {
 
 function StatCard({ title, value, subtitle, positive, icon: Icon, color }) {
   return (
-    <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+    <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 min-w-[200px] md:min-w-0">
       <div className="flex items-start justify-between mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
           <Icon size={20} className="text-white" />
@@ -74,7 +74,7 @@ export default function Dashboard() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="flex gap-4 mb-8 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible">
             <StatCard
               title="Portfolio Value"
               value={formatPKR(summary?.total_current_value)}
