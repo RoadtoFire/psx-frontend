@@ -98,13 +98,13 @@ function StockDetailModal({ symbol, onClose }) {
             </div>
 
             {/* Current price */}
-            {stock.latest_price && (
+            {stock.latest_price_detail && (
               <div className="bg-gray-800/50 rounded-xl p-4">
                 <div className="text-gray-400 text-xs mb-1">Current Price</div>
                 <div className="text-white text-2xl font-bold">
-                  Rs. {stock.latest_price.close?.toFixed(2)}
+                  Rs. {stock.latest_price_detail.close?.toFixed(2)}
                 </div>
-                <div className="text-gray-500 text-xs mt-1">As of {stock.latest_price.date}</div>
+                <div className="text-gray-500 text-xs mt-1">As of {stock.latest_price_detail.date}</div>
               </div>
             )}
 

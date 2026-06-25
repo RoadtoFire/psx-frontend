@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getDividendIncome, markPurified, getPurificationHistory } from '../api/portfolio'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-
-function formatPKR(amount) {
-  if (amount >= 10000000) return `Rs. ${(amount / 10000000).toFixed(2)}Cr`
-  if (amount >= 100000) return `Rs. ${(amount / 100000).toFixed(2)}L`
-  if (amount >= 1000) return `Rs. ${(amount / 1000).toFixed(1)}K`
-  return `Rs. ${amount?.toFixed(2)}`
-}
+import { formatPKR } from '../utils/format'
 
 function SummaryCard({ label, value, sub, color, action }) {
   return (
@@ -32,8 +26,7 @@ export default function Dividends() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-  const [purified, setPurified] = useState(false)
-  const [purificationHistory, setPurificationHistory] = useState(null)  
+  const [purificationHistory, setPurificationHistory] = useState(null)
 
   useEffect(() => {
     getDividendIncome()
@@ -51,7 +44,6 @@ const handleMarkPurified = async () => {
   try {
     const today = new Date().toISOString().split('T')[0]
     await markPurified(summary.total_purification, today)
-    setPurified(true)
     getPurificationHistory().then(setPurificationHistory)
   } catch {
     // silently fail
@@ -60,6 +52,9 @@ const handleMarkPurified = async () => {
   
   const dividends = data?.dividends || []
   const summary = data?.summary
+
+  const isPurified = summary?.total_purification > 0
+    && purificationHistory?.total_purified >= summary?.total_purification
 
   // Group by year for chart
   const byYear = dividends.reduce((acc, d) => {
@@ -149,13 +144,13 @@ const handleMarkPurified = async () => {
             />
             <SummaryCard
               label="Purification Due"
-              value={purified ? 'Rs. 0' : formatPKR(summary?.total_purification)}
-              sub={purified
+              value={isPurified ? 'Rs. 0' : formatPKR(summary?.total_purification)}
+              sub={isPurified
                 ? `✓ Marked as given`
                 : 'Give in charity'
               }
               color="text-amber-400"
-              action={!purified && summary?.total_purification > 0 ? {
+              action={!isPurified && summary?.total_purification > 0 ? {
                 label: 'Mark as purified',
                 onClick: handleMarkPurified
               } : null}

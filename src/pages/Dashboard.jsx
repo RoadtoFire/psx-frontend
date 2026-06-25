@@ -3,6 +3,7 @@ import { getPortfolioValue } from '../api/portfolio'
 import { useAuth } from '../context/useAuth'
 import { TrendingUp, TrendingDown, DollarSign, BarChart2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { formatPKR } from '../utils/format'
 
 function BagIcon({ size = 20 }) {
   return <span style={{ fontSize: size }}>💰</span>
@@ -26,13 +27,6 @@ function StatCard({ title, value, subtitle, positive, icon: Icon, color }) {
       {subtitle && <div className="text-gray-600 text-xs mt-1">{subtitle}</div>}
     </div>
   )
-}
-
-function formatPKR(amount) {
-  if (amount >= 10000000) return `Rs. ${(amount / 10000000).toFixed(2)}Cr`
-  if (amount >= 100000) return `Rs. ${(amount / 100000).toFixed(2)}L`
-  if (amount >= 1000) return `Rs. ${(amount / 1000).toFixed(1)}K`
-  return `Rs. ${amount?.toFixed(2)}`
 }
 
 export default function Dashboard() {
@@ -91,7 +85,7 @@ export default function Dashboard() {
         />
             <StatCard
               title="Total P&L"
-              value={formatPKR(Math.abs(summary?.total_pnl))}
+              value={<>{summary?.total_pnl >= 0 ? '+' : ''}{formatPKR(summary?.total_pnl)}</>}
               subtitle={`${summary?.total_pnl_pct?.toFixed(2)}% return`}
               positive={summary?.total_pnl >= 0}
               icon={summary?.total_pnl >= 0 ? TrendingUp : TrendingDown}

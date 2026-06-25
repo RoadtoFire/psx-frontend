@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { login } from '../api/auth'
+import { login, getProfile } from '../api/auth'
 import { useAuth } from '../context/useAuth'
 
 export default function Login() {
@@ -17,7 +17,6 @@ export default function Login() {
     setLoading(true)
     try {
       await login(email, password)
-      const { getProfile } = await import('../api/auth')
       const user = await getProfile()
       setUser(user)
       navigate('/dashboard')

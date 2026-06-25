@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { register, login } from '../api/auth'
+import { register, login, getProfile } from '../api/auth'
 import { useAuth } from '../context/useAuth'
 
 export default function Register() {
@@ -32,7 +32,6 @@ export default function Register() {
     try {
       await register(form)
       await login(form.email, form.password)
-      const { getProfile } = await import('../api/auth')
       const user = await getProfile()
       setUser(user)
       navigate('/dashboard')
