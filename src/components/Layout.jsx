@@ -38,7 +38,7 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex relative overflow-hidden">
+    <div className="min-h-screen bg-gray-950 flex relative overflow-x-hidden">
         {/* Ambient background blobs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500 rounded-full filter blur-3xl opacity-20 animate-blob" />

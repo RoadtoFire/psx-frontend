@@ -205,7 +205,7 @@ export default function Macro() {
       {loading && !data && (
         <div className="space-y-4 animate-pulse">
           <div className="h-64 bg-gray-900/60 border border-gray-800 rounded-2xl" />
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-3 gap-3">
             {[0, 1, 2].map(i => <div key={i} className="h-40 bg-gray-900/60 border border-gray-800 rounded-2xl" />)}
           </div>
           <div className="h-14 bg-gray-900/60 border border-gray-800 rounded-2xl" />
@@ -244,49 +244,67 @@ export default function Macro() {
                 )}
               </div>
 
-              {/* Formula — CSS grid for baseline alignment */}
-              <div
-                className="mb-8"
-                style={{ display: 'grid', gridTemplateColumns: 'auto 52px auto 52px auto', alignItems: 'end', rowGap: '8px' }}
-              >
-                {/* Row 1: values */}
-                <span className="font-mono text-[30px] font-semibold text-gray-300 tabular-nums leading-none">
-                  {snap?.kse100_earnings_yield != null ? `${fmt(snap.kse100_earnings_yield)}%` : '—'}
-                </span>
-                <span className="text-[28px] text-gray-600 font-light text-center leading-none">−</span>
-                <span className="font-mono text-[30px] font-semibold text-gray-300 tabular-nums leading-none">
-                  {snap?.kibor_6m != null ? `${fmt(snap.kibor_6m)}%` : '—'}
-                </span>
-                <span className="text-[28px] text-gray-600 font-light text-center leading-none">=</span>
-                <span className={`font-mono text-[52px] font-bold tabular-nums leading-none ${erpSig.text}`}>
-                  {snap?.market_erp != null ? `${snap.market_erp > 0 ? '+' : ''}${fmt(snap.market_erp)}%` : '—'}
-                </span>
-
-                {/* Row 2: labels */}
-                <span className="text-xs text-gray-600 uppercase tracking-[.08em] font-medium self-start">
-                  Earnings Yield
-                </span>
-                <span />
-                <span className="text-xs text-gray-600 self-start">
+              {/* Formula — mobile: flex-wrap; desktop: CSS grid for baseline alignment */}
+              {(() => {
+                const eyVal = snap?.kse100_earnings_yield != null ? `${fmt(snap.kse100_earnings_yield)}%` : '—'
+                const kibVal = snap?.kibor_6m != null ? `${fmt(snap.kibor_6m)}%` : '—'
+                const erpVal = snap?.market_erp != null ? `${snap.market_erp > 0 ? '+' : ''}${fmt(snap.market_erp)}%` : '—'
+                const peNote = snap?.kse100_forward_pe != null
+                  ? `KSE-100 Forward PE ${Number(snap.kse100_forward_pe).toFixed(1)}×`
+                  : 'Set Forward PE in Scrape Monitor'
+                const kibTooltip = (
                   <Tooltip label="KIBOR 6M" align="left">
                     Pakistan's interbank interest rate, the benchmark return on savings deposits and money market funds.
                     When KIBOR is high, it's the hurdle equities must clear. The State Bank raises it to fight inflation
                     and cuts it to stimulate growth.
                   </Tooltip>
-                </span>
-                <span />
-                <span className={`text-xs uppercase tracking-[.08em] font-medium self-start ${erpSig.text} opacity-70`}>
-                  ERP Spread
-                </span>
+                )
+                return (
+                  <>
+                    {/* Mobile layout */}
+                    <div className="sm:hidden mb-6">
+                      <div className="flex items-end gap-2 flex-wrap mb-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-2xl font-semibold text-gray-300 tabular-nums leading-none">{eyVal}</span>
+                          <span className="text-[10px] text-gray-600 uppercase tracking-[.08em] font-medium">Earnings Yield</span>
+                        </div>
+                        <span className="text-2xl text-gray-600 font-light leading-none pb-4">−</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-2xl font-semibold text-gray-300 tabular-nums leading-none">{kibVal}</span>
+                          <span className="text-[10px] text-gray-600">{kibTooltip}</span>
+                        </div>
+                        <span className="text-2xl text-gray-600 font-light leading-none pb-4">=</span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`font-mono text-[40px] font-bold tabular-nums leading-none ${erpSig.text}`}>{erpVal}</span>
+                          <span className={`text-[10px] uppercase tracking-[.08em] font-medium ${erpSig.text} opacity-70`}>ERP Spread</span>
+                        </div>
+                      </div>
+                      <span className="font-mono text-xs text-gray-700">{peNote}</span>
+                    </div>
 
-                {/* Row 3: note */}
-                <span className="font-mono text-xs text-gray-700 self-start mt-0.5">
-                  {snap?.kse100_forward_pe != null
-                    ? `KSE-100 Forward PE ${Number(snap.kse100_forward_pe).toFixed(1)}×`
-                    : 'Set Forward PE in Scrape Monitor'}
-                </span>
-                <span /><span /><span /><span />
-              </div>
+                    {/* Desktop layout — CSS grid */}
+                    <div
+                      className="hidden sm:grid mb-8"
+                      style={{ gridTemplateColumns: 'auto 52px auto 52px auto', alignItems: 'end', rowGap: '8px' }}
+                    >
+                      <span className="font-mono text-[30px] font-semibold text-gray-300 tabular-nums leading-none">{eyVal}</span>
+                      <span className="text-[28px] text-gray-600 font-light text-center leading-none">−</span>
+                      <span className="font-mono text-[30px] font-semibold text-gray-300 tabular-nums leading-none">{kibVal}</span>
+                      <span className="text-[28px] text-gray-600 font-light text-center leading-none">=</span>
+                      <span className={`font-mono text-[52px] font-bold tabular-nums leading-none ${erpSig.text}`}>{erpVal}</span>
+
+                      <span className="text-xs text-gray-600 uppercase tracking-[.08em] font-medium self-start">Earnings Yield</span>
+                      <span />
+                      <span className="text-xs text-gray-600 self-start">{kibTooltip}</span>
+                      <span />
+                      <span className={`text-xs uppercase tracking-[.08em] font-medium self-start ${erpSig.text} opacity-70`}>ERP Spread</span>
+
+                      <span className="font-mono text-xs text-gray-700 self-start mt-0.5">{peNote}</span>
+                      <span /><span /><span /><span />
+                    </div>
+                  </>
+                )
+              })()}
 
               {/* Spectrum bar */}
               {spectrumPos != null && (
@@ -391,11 +409,28 @@ export default function Macro() {
               </WarnCard>
             </div>
 
-            {/* Composite stepper */}
-            <div className="mt-3 flex items-stretch bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden">
+            {/* Composite stepper — mobile: stacked; desktop: side-by-side */}
+
+            {/* Mobile */}
+            <div className="sm:hidden mt-3 bg-gray-900/60 border border-gray-800 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                {COMPOSITE_STEPS.map(step => {
+                  const active = step === composite
+                  return (
+                    <span key={step} className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[.06em] ${active ? compSig.text : 'text-gray-700'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${active ? compSig.dot : 'bg-gray-800 border border-gray-700'}`} />
+                      {COMPOSITE_LABEL[step]}
+                    </span>
+                  )
+                })}
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed">{COMPOSITE_DESC[composite]}</p>
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden sm:flex mt-3 items-stretch bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden">
               {COMPOSITE_STEPS.map((step, i) => {
                 const active = step === composite
-                const s = active ? compSig : null
                 return (
                   <div
                     key={step}
@@ -491,8 +526,10 @@ export default function Macro() {
           <section>
             <p className="text-xs font-semibold uppercase tracking-[.10em] text-gray-600 mb-3">Key Indicators</p>
             {/* No overflow-hidden so tooltips escape the grid */}
+            {/* overflow-visible so tooltips escape; borders on cells instead of gap-px trick */}
             <div className="bg-gray-900/60 border border-gray-800 rounded-2xl" style={{ overflow: 'visible' }}>
-              <div className="grid grid-cols-3">
+              {/* 2-col on mobile, 3-col on sm+ */}
+              <div className="grid grid-cols-2 sm:grid-cols-3">
                 {[
                   {
                     label: <Tooltip label="KIBOR 6M" align="left">
@@ -535,14 +572,24 @@ export default function Macro() {
                 ].map((stat, i) => (
                   <div
                     key={i}
-                    className={`px-5 py-5 flex flex-col gap-1.5 ${
-                      [0, 1, 3, 4].includes(i) ? 'border-r border-gray-800' : ''
-                    } ${i < 3 ? 'border-b border-gray-800' : ''}`}
+                    className={[
+                      'px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-1.5',
+                      // Right border: mobile=odd cols (0,2,4), desktop=non-last col (not 2,5)
+                      i % 2 === 0 ? 'border-r border-gray-800' : '',
+                      // sm overrides: remove right border from col-3 on desktop (index 2,5)
+                      i === 2 || i === 5 ? 'sm:border-r-0' : '',
+                      // sm adds right border back to col-2 on desktop (index 1,4)
+                      i === 1 || i === 4 ? 'sm:border-r sm:border-gray-800' : '',
+                      // Bottom border: mobile=first 4 (2 rows of 2), desktop=first 3 (row 1 of 3)
+                      i < 4 ? 'border-b border-gray-800' : '',
+                      i === 3 ? 'sm:border-b-0' : '',
+                      i < 3 ? 'sm:border-b sm:border-gray-800' : '',
+                    ].join(' ')}
                   >
                     <div className="text-xs font-semibold uppercase tracking-[.09em] text-gray-600">
                       {stat.label}
                     </div>
-                    <div className="font-mono text-2xl font-bold text-white tabular-nums leading-tight">
+                    <div className="font-mono text-xl sm:text-2xl font-bold text-white tabular-nums leading-tight">
                       {stat.val}
                     </div>
                     <div className="text-xs text-gray-700">{stat.note}</div>
