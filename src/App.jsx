@@ -15,6 +15,7 @@ import Portfolio from './pages/Portfolio'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
+import Macro from './pages/Macro'
 import Layout from './components/Layout'
 import { useAuth } from './context/useAuth'
 
@@ -68,6 +69,11 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/macro" element={
+          <ProtectedRoute>
+            <Macro />
           </ProtectedRoute>
         } />
         <Route path="/admin" element={

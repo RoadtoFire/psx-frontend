@@ -8,6 +8,7 @@ import {
   DollarSign,
   BookOpen,
   ShieldCheck,
+  Globe,
   User,
   LogOut,
   Menu,
@@ -20,6 +21,7 @@ const navItems = [
   { path: '/portfolio', icon: TrendingUp, label: 'Portfolio' },
   { path: '/dividends', icon: DollarSign, label: 'Dividends' },
   { path: '/stocks', icon: ShieldCheck, label: 'Stocks' },
+  { path: '/macro', icon: Globe, label: 'Macro' },
   { path: '/learn', icon: BookOpen, label: 'Learn' },
 ]
 

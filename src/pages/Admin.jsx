@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import api from '../api/axios'
+import { setForwardPE } from '../api/macro'
 
 const JOB_META = {
   update_prices: {
@@ -14,8 +15,13 @@ const JOB_META = {
   },
   process_notifications: {
     label: 'Notifications',
-    description: 'Sends WhatsApp notifications for dividends with today\'s ex-date.',
+    description: "Sends WhatsApp notifications for dividends with today's ex-date.",
     schedule: 'Daily · 7:00 PM PKT',
+  },
+  update_macro: {
+    label: 'Macro Update',
+    description: 'Scrapes KIBOR, PKR/USD, FX reserves, CPI, and Brent crude. Computes ERP and macro stress signals.',
+    schedule: 'Daily · 7:30 PM PKT',
   },
 }
 
@@ -155,6 +161,66 @@ function HistoryRow({ log }) {
   )
 }
 
+function ForwardPEPanel() {
+  const [pe, setPe] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSave = async () => {
+    const val = parseFloat(pe)
+    if (!pe || isNaN(val) || val <= 0) {
+      setError('Enter a positive number, e.g. 7.2')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      await setForwardPE(val)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch {
+      setError('Failed to save. Check the value and try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5">
+      <div className="mb-4">
+        <div className="text-white font-semibold text-base">KSE-100 Forward PE</div>
+        <div className="text-gray-500 text-xs mt-0.5">
+          Set from broker consensus weekly. Drives the ERP signal on the Macro tab for all users.
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <input
+          type="number"
+          step="0.1"
+          min="0.1"
+          value={pe}
+          onChange={e => { setPe(e.target.value); setError('') }}
+          onKeyDown={e => e.key === 'Enter' && handleSave()}
+          placeholder="e.g. 7.2"
+          className="bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm font-mono w-36 focus:outline-none focus:border-emerald-600 tabular-nums"
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        {saved && (
+          <span className="text-emerald-400 text-sm font-medium">Saved</span>
+        )}
+      </div>
+      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+    </div>
+  )
+}
+
 export default function Admin() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -262,6 +328,12 @@ export default function Admin() {
           <p className="text-sm mt-1 text-gray-600">Trigger a cron job to see its log here.</p>
         </div>
       )}
+
+      {/* Forward PE panel */}
+      <div className="mt-8">
+        <h2 className="text-white font-semibold mb-3">Market Data</h2>
+        <ForwardPEPanel />
+      </div>
     </div>
   )
 }
