@@ -136,6 +136,7 @@ export default function Register() {
                   placeholder="••••••••"
                   required
                 />
+                <p className="text-gray-600 text-xs mt-1.5">Min 8 chars, not a common word</p>
               </div>
               <div>
                 <label className="text-gray-400 text-sm mb-1.5 block">Confirm</label>
