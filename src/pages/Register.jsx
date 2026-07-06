@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { register, login, getProfile } from '../api/auth'
+import { GoogleLogin } from '@react-oauth/google'
+import { register, login, getProfile, googleAuth } from '../api/auth'
 import { useAuth } from '../context/useAuth'
 
 export default function Register() {
@@ -19,6 +20,21 @@ export default function Register() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('')
+    setLoading(true)
+    try {
+      await googleAuth(credentialResponse.credential)
+      const user = await getProfile()
+      setUser(user)
+      navigate('/dashboard')
+    } catch {
+      setError('Google sign-in failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -88,13 +104,31 @@ export default function Register() {
 
         {/* Card */}
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-800/50 shadow-2xl">
-          <h2 className="text-white text-xl font-semibold mb-6">Get started</h2>
+          <h2 className="text-white text-xl font-semibold mb-5">Get started</h2>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 mb-4 text-sm">
               {error}
             </div>
           )}
+
+          {/* Google sign-up */}
+          <div className="flex justify-center mb-5">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google sign-in failed. Please try again.')}
+              theme="filled_black"
+              shape="rectangular"
+              text="signup_with"
+              width="320"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px bg-gray-800" />
+            <span className="text-gray-600 text-xs">or register with email</span>
+            <div className="flex-1 h-px bg-gray-800" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

@@ -11,7 +11,8 @@ import {
   User,
   LogOut,
   Menu,
-  X
+  X,
+  Activity
 } from 'lucide-react'
 
 const navItems = [
@@ -88,6 +89,19 @@ export default function Layout({ children }) {
               </Link>
             )
           })}
+          {user?.is_staff && (
+            <Link
+              to="/admin"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
+                location.pathname === '/admin'
+                  ? 'bg-emerald-600/15 text-emerald-400 border border-emerald-600/20'
+                  : 'text-gray-600 hover:bg-gray-800 hover:text-white'
+              }`}
+            >
+              <Activity size={18} />
+              Scrape Monitor
+            </Link>
+          )}
         </nav>
 
         {/* User section */}
@@ -150,6 +164,20 @@ export default function Layout({ children }) {
                 </Link>
               )
             })}
+            {user?.is_staff && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all text-base font-medium ${
+                  location.pathname === '/admin'
+                    ? 'bg-emerald-600/15 text-emerald-400'
+                    : 'text-gray-500'
+                }`}
+              >
+                <Activity size={20} />
+                Scrape Monitor
+              </Link>
+            )}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-4 rounded-xl text-red-400 text-base font-medium"

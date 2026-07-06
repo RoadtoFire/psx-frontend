@@ -12,12 +12,22 @@ import Stocks from './pages/Stocks'
 import Learn from './pages/Learn'
 import Dividends from './pages/Dividends'
 import Portfolio from './pages/Portfolio'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import Admin from './pages/Admin'
 import Layout from './components/Layout'
 import { useAuth } from './context/useAuth'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   return user ? <Layout>{children}</Layout> : <Navigate to="/login" />
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" />
+  if (!user.is_staff) return <Navigate to="/dashboard" />
+  return <Layout>{children}</Layout>
 }
 
 function App() {
@@ -28,6 +38,8 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
@@ -57,6 +69,11 @@ function App() {
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { login, getProfile } from '../api/auth'
+import { GoogleLogin } from '@react-oauth/google'
+import { login, getProfile, googleAuth } from '../api/auth'
 import { useAuth } from '../context/useAuth'
 
 export default function Login() {
@@ -22,6 +23,21 @@ export default function Login() {
       navigate('/dashboard')
     } catch {
       setError('Invalid email or password')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('')
+    setLoading(true)
+    try {
+      await googleAuth(credentialResponse.credential)
+      const user = await getProfile()
+      setUser(user)
+      navigate('/dashboard')
+    } catch {
+      setError('Google sign-in failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -82,6 +98,24 @@ export default function Login() {
             </div>
           )}
 
+          {/* Google sign-in */}
+          <div className="flex justify-center mb-5">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google sign-in failed. Please try again.')}
+              theme="filled_black"
+              shape="rectangular"
+              text="signin_with"
+              width="320"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px bg-gray-800" />
+            <span className="text-gray-600 text-xs">or continue with email</span>
+            <div className="flex-1 h-px bg-gray-800" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-gray-400 text-sm mb-1.5 block">Email</label>
@@ -96,7 +130,12 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm mb-1.5 block">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-gray-400 text-sm">Password</label>
+                <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-400 text-xs transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 type="password"
                 value={password}

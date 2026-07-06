@@ -9,11 +9,17 @@ export const login = async (email, password) => {
 
 export const register = async (data) => {
   const res = await api.post('/api/v1/auth/register/', data)
-  // Save tokens immediately after registration
   if (res.data.access) {
     localStorage.setItem('access_token', res.data.access)
     localStorage.setItem('refresh_token', res.data.refresh)
   }
+  return res.data
+}
+
+export const googleAuth = async (credential) => {
+  const res = await api.post('/api/v1/auth/google/', { credential })
+  localStorage.setItem('access_token', res.data.access)
+  localStorage.setItem('refresh_token', res.data.refresh)
   return res.data
 }
 
@@ -25,4 +31,14 @@ export const getProfile = async () => {
 export const logout = () => {
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
+}
+
+export const requestPasswordReset = async (email) => {
+  const res = await api.post('/api/v1/auth/password-reset/', { email })
+  return res.data
+}
+
+export const confirmPasswordReset = async (uid, token, new_password) => {
+  const res = await api.post('/api/v1/auth/password-reset-confirm/', { uid, token, new_password })
+  return res.data
 }
