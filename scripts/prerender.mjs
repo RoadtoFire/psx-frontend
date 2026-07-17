@@ -126,6 +126,20 @@ async function main() {
           else seen.add(key)
         }
 
+        // React 19 inserts its hoisted <title> at the START of <head> (priority
+        // slot) while metas append at the end, so keep-last picks the wrong
+        // title. og:title always carries the same string and dedupes correctly
+        // — make the title authoritative from it.
+        const ogTitle = document.querySelector('meta[property="og:title"]')
+        if (ogTitle) {
+          let t = document.querySelector('title')
+          if (!t) {
+            t = document.createElement('title')
+            document.head.prepend(t)
+          }
+          t.textContent = ogTitle.getAttribute('content')
+        }
+
         return '<!doctype html>\n' + document.documentElement.outerHTML
       }, STRIP_SELECTORS)
 
