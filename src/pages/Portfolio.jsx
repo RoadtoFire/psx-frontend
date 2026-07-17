@@ -217,6 +217,7 @@ function ImportModal({ onClose, onSuccess }) {
   const [importing, setImporting] = useState(false)
   const [createdCount, setCreatedCount] = useState(0)
   const fileRef = useRef()
+  const finqlabRef = useRef()
 
   const handleFile = (f) => {
     if (!f) return
@@ -230,12 +231,11 @@ function ImportModal({ onClose, onSuccess }) {
     handleFile(e.dataTransfer.files[0])
   }
 
-  const handleParse = async () => {
-    if (!file) return
+  const doParse = async (fileObj) => {
     setParsing(true)
     setError('')
     try {
-      const data = await importTransactionsPreview(file)
+      const data = await importTransactionsPreview(fileObj)
       if (data.error) { setError(data.error); return }
       setRows(data.parsed || [])
       setSkipped(data.skipped || [])
@@ -249,6 +249,15 @@ function ImportModal({ onClose, onSuccess }) {
     } finally {
       setParsing(false)
     }
+  }
+
+  const handleParse = () => { if (file) doParse(file) }
+
+  const handleFinqlabFile = (f) => {
+    if (!f) return
+    setFile(f)
+    setError('')
+    doParse(f)
   }
 
   const updateRow = (i, field, value) => {
@@ -341,8 +350,32 @@ function ImportModal({ onClose, onSuccess }) {
                 disabled={!file || parsing}
                 className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-semibold rounded-xl py-3 transition-colors text-sm"
               >
-                {parsing ? 'Parsing… this may take a few seconds' : 'Parse File'}
+                {parsing ? 'Parsing…' : 'Parse File'}
               </button>
+
+              <div className="relative flex items-center gap-3">
+                <div className="flex-1 border-t border-gray-800" />
+                <span className="text-gray-600 text-xs">or</span>
+                <div className="flex-1 border-t border-gray-800" />
+              </div>
+
+              <button
+                onClick={() => finqlabRef.current?.click()}
+                disabled={parsing}
+                className="w-full border border-gray-700 hover:border-gray-500 disabled:opacity-40 text-gray-300 hover:text-white font-semibold rounded-xl py-3 transition-colors text-sm flex items-center justify-center gap-2"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
+                </svg>
+                Finqalab Cashbook (PDF)
+              </button>
+              <input
+                ref={finqlabRef}
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => handleFinqlabFile(e.target.files[0])}
+              />
             </div>
           )}
 
