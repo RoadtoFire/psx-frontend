@@ -34,3 +34,17 @@ export const getPurificationHistory = async () => {
   const res = await api.get('/api/v1/portfolio/purification/history/')
   return res.data
 }
+
+export const importTransactionsPreview = async (file) => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await api.post('/api/v1/portfolio/transactions/import/', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+export const confirmTransactionImport = async (transactions) => {
+  const res = await api.post('/api/v1/portfolio/transactions/import/confirm/', { transactions })
+  return res.data
+}

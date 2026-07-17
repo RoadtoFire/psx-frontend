@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
-import { getPortfolio, addTransaction, deleteTransaction } from '../api/portfolio'
+import { useState, useEffect, useRef } from 'react'
+import { getPortfolio, addTransaction, deleteTransaction, importTransactionsPreview, confirmTransactionImport } from '../api/portfolio'
 import { getStocks } from '../api/stocks'
-import { Plus, Trash2, TrendingUp, TrendingDown, X } from 'lucide-react'
+import { Plus, Trash2, TrendingUp, TrendingDown, X, Upload } from 'lucide-react'
 
 function ConfirmModal({ message, onConfirm, onCancel }) {
   return (
@@ -203,10 +203,315 @@ function AddTransactionModal({ onClose, onSuccess }) {
   )
 }
 
+const ACCEPTED = '.csv,.xlsx,.png,.jpg,.jpeg'
+
+function ImportModal({ onClose, onSuccess }) {
+  const [stage, setStage] = useState('upload')   // 'upload' | 'preview' | 'success'
+  const [dragging, setDragging] = useState(false)
+  const [file, setFile] = useState(null)
+  const [parsing, setParsing] = useState(false)
+  const [error, setError] = useState('')
+  const [rows, setRows] = useState([])            // editable parsed rows
+  const [skipped, setSkipped] = useState([])
+  const [showSkipped, setShowSkipped] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [createdCount, setCreatedCount] = useState(0)
+  const fileRef = useRef()
+
+  const handleFile = (f) => {
+    if (!f) return
+    setFile(f)
+    setError('')
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragging(false)
+    handleFile(e.dataTransfer.files[0])
+  }
+
+  const handleParse = async () => {
+    if (!file) return
+    setParsing(true)
+    setError('')
+    try {
+      const data = await importTransactionsPreview(file)
+      if (data.error) { setError(data.error); return }
+      setRows(data.parsed || [])
+      setSkipped(data.skipped || [])
+      if ((data.parsed || []).length === 0 && (data.skipped || []).length === 0) {
+        setError(data.message || 'No transaction rows found in the file.')
+        return
+      }
+      setStage('preview')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to parse the file. Please try again.')
+    } finally {
+      setParsing(false)
+    }
+  }
+
+  const updateRow = (i, field, value) => {
+    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [field]: value } : r))
+  }
+
+  const removeRow = (i) => {
+    setRows(prev => prev.filter((_, idx) => idx !== i))
+  }
+
+  const handleConfirm = async () => {
+    if (!rows.length) return
+    setImporting(true)
+    setError('')
+    try {
+      const data = await confirmTransactionImport(rows)
+      setCreatedCount(data.created || 0)
+      setStage('success')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Import failed. Please try again.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  const cellCls = 'bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white w-full focus:outline-none focus:border-emerald-500'
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-3xl shadow-2xl max-h-[90vh] flex flex-col">
+
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-800 flex-shrink-0">
+          <div>
+            <h2 className="text-white font-semibold text-lg">Import Transactions</h2>
+            <p className="text-gray-500 text-xs mt-0.5">Upload a CSV, Excel, or screenshot from your broker</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+
+          {/* ── Stage: upload ── */}
+          {stage === 'upload' && (
+            <div className="space-y-4">
+              <div
+                className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-colors ${
+                  dragging ? 'border-emerald-500 bg-emerald-500/5' : 'border-gray-700 hover:border-gray-600'
+                }`}
+                onClick={() => fileRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+              >
+                <Upload size={32} className="mx-auto mb-3 text-gray-500" />
+                {file ? (
+                  <p className="text-emerald-400 font-medium text-sm">{file.name}</p>
+                ) : (
+                  <>
+                    <p className="text-white font-medium mb-1">Drop your file here or click to browse</p>
+                    <p className="text-gray-500 text-xs">CSV, Excel (.xlsx), or screenshot (.png / .jpg)</p>
+                  </>
+                )}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept={ACCEPTED}
+                  className="hidden"
+                  onChange={(e) => handleFile(e.target.files[0])}
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="bg-gray-800/50 border border-gray-800 rounded-xl px-4 py-3 text-xs text-gray-500 space-y-1">
+                <p className="font-medium text-gray-400">Supported formats</p>
+                <p>CSV / Excel: any broker export — column names are detected automatically.</p>
+                <p>Screenshot: a photo or screenshot of a transaction table.</p>
+              </div>
+
+              <button
+                onClick={handleParse}
+                disabled={!file || parsing}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-semibold rounded-xl py-3 transition-colors text-sm"
+              >
+                {parsing ? 'Parsing… this may take a few seconds' : 'Parse File'}
+              </button>
+            </div>
+          )}
+
+          {/* ── Stage: preview ── */}
+          {stage === 'preview' && (
+            <div className="space-y-4">
+              <p className="text-gray-400 text-sm">
+                Review and edit the detected transactions before importing.
+                {skipped.length > 0 && (
+                  <span className="text-amber-400 ml-1">{skipped.length} row{skipped.length !== 1 ? 's' : ''} could not be parsed.</span>
+                )}
+              </p>
+
+              {rows.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-sm">
+                  No importable rows remain. Remove bad rows from skipped or upload a different file.
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-gray-800">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-800 bg-gray-900">
+                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Symbol</th>
+                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Date</th>
+                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Type</th>
+                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Shares</th>
+                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Price</th>
+                        <th className="px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800">
+                      {rows.map((row, i) => (
+                        <tr key={i} className="hover:bg-gray-800/30">
+                          <td className="px-3 py-2">
+                            <input
+                              value={row.stock_symbol || ''}
+                              onChange={(e) => updateRow(i, 'stock_symbol', e.target.value.toUpperCase())}
+                              className={cellCls + ' w-24 font-mono'}
+                              placeholder="OGDC"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="date"
+                              value={row.date || ''}
+                              onChange={(e) => updateRow(i, 'date', e.target.value)}
+                              className={cellCls + ' w-32'}
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <select
+                              value={row.transaction_type || 'buy'}
+                              onChange={(e) => updateRow(i, 'transaction_type', e.target.value)}
+                              className={cellCls + ' w-20'}
+                            >
+                              <option value="buy">Buy</option>
+                              <option value="sell">Sell</option>
+                            </select>
+                          </td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="number"
+                              value={row.shares || ''}
+                              onChange={(e) => updateRow(i, 'shares', e.target.value)}
+                              className={cellCls + ' w-24'}
+                              placeholder="100"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="number"
+                              value={row.price_per_share || ''}
+                              onChange={(e) => updateRow(i, 'price_per_share', e.target.value)}
+                              className={cellCls + ' w-28'}
+                              placeholder="250.00"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <button onClick={() => removeRow(i)} className="text-gray-600 hover:text-red-400 transition-colors">
+                              <X size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Skipped rows */}
+              {skipped.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setShowSkipped(v => !v)}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    {showSkipped ? '▲ Hide' : '▼ Show'} {skipped.length} skipped row{skipped.length !== 1 ? 's' : ''}
+                  </button>
+                  {showSkipped && (
+                    <div className="mt-2 space-y-1">
+                      {skipped.map((s, i) => (
+                        <div key={i} className="bg-red-500/5 border border-red-500/15 rounded-lg px-3 py-2 text-xs text-red-400">
+                          Row {s.row}: {s.reason}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Stage: success ── */}
+          {stage === 'success' && (
+            <div className="text-center py-8">
+              <div className="text-5xl mb-4">✅</div>
+              <h3 className="text-white font-semibold text-lg mb-2">Import complete</h3>
+              <p className="text-gray-400 text-sm">
+                {createdCount} transaction{createdCount !== 1 ? 's' : ''} added to your portfolio.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {stage === 'preview' && (
+          <div className="flex items-center justify-between p-6 border-t border-gray-800 flex-shrink-0">
+            <button
+              onClick={() => { setStage('upload'); setError('') }}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={importing || rows.length === 0}
+              className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors"
+            >
+              {importing ? 'Importing…' : `Import ${rows.length} transaction${rows.length !== 1 ? 's' : ''}`}
+            </button>
+          </div>
+        )}
+
+        {stage === 'success' && (
+          <div className="p-6 border-t border-gray-800 flex-shrink-0">
+            <button
+              onClick={() => { onClose(); onSuccess() }}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl py-3 transition-colors text-sm"
+            >
+              Done
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function Portfolio() {
   const [portfolio, setPortfolio] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [confirmId, setConfirmId] = useState(null)
 
   const fetchPortfolio = () => {
@@ -240,13 +545,22 @@ export default function Portfolio() {
           <h1 className="text-white text-2xl font-bold">Portfolio</h1>
           <p className="text-gray-400 mt-1">Manage your transactions</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
-        >
-          <Plus size={18} />
-          Add Transaction
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm"
+          >
+            <Upload size={16} />
+            Import
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
+          >
+            <Plus size={18} />
+            Add Transaction
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -325,6 +639,13 @@ export default function Portfolio() {
       {showModal && (
         <AddTransactionModal
           onClose={() => setShowModal(false)}
+          onSuccess={fetchPortfolio}
+        />
+      )}
+
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
           onSuccess={fetchPortfolio}
         />
       )}
