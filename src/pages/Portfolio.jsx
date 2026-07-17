@@ -1,33 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
 import { getPortfolio, addTransaction, deleteTransaction, importTransactionsPreview, confirmTransactionImport } from '../api/portfolio'
 import { getStocks } from '../api/stocks'
-import { Plus, Trash2, TrendingUp, TrendingDown, X, Upload } from 'lucide-react'
+import { Plus, Trash2, TrendingUp, TrendingDown, X, Upload, CheckCircle2, BarChart2, FileText, Check } from 'lucide-react'
+import { PageHeader, Modal, Button, Field, Input, EmptyState } from '../components/ui'
+import Seo from '../components/Seo'
 
 function ConfirmModal({ message, onConfirm, onCancel }) {
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-sm shadow-2xl p-6">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🗑️</div>
-          <h3 className="text-white font-semibold text-lg mb-2">Delete Transaction</h3>
-          <p className="text-gray-400 text-sm mb-6">{message}</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={onCancel}
-              className="py-3 rounded-xl border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-all text-sm font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="py-3 rounded-xl bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 transition-all text-sm font-medium"
-            >
-              Delete
-            </button>
-          </div>
+    <Modal onClose={onCancel} size="sm">
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+          <Trash2 size={24} className="text-red-400" />
+        </div>
+        <h3 className="text-white font-semibold text-lg mb-2">Delete Transaction</h3>
+        <p className="text-ink-mid text-sm mb-6">{message}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+          <Button variant="danger" onClick={onConfirm}>Delete</Button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -78,50 +70,44 @@ function AddTransactionModal({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
-          <h2 className="text-white font-semibold text-lg">Add Transaction</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <X size={20} />
+    <Modal title="Add Transaction" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, transaction_type: 'buy' })}
+            className={`py-3 rounded-xl border text-sm font-medium transition-all inline-flex items-center justify-center gap-2 ${
+              form.transaction_type === 'buy'
+                ? 'bg-brand-600/20 border-brand-500 text-brand-400'
+                : 'bg-gray-800/50 border-gray-700/50 text-ink-mid'
+            }`}
+          >
+            <TrendingUp size={16} />
+            Buy
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, transaction_type: 'sell' })}
+            className={`py-3 rounded-xl border text-sm font-medium transition-all inline-flex items-center justify-center gap-2 ${
+              form.transaction_type === 'sell'
+                ? 'bg-red-600/20 border-red-500 text-red-400'
+                : 'bg-gray-800/50 border-gray-700/50 text-ink-mid'
+            }`}
+          >
+            <TrendingDown size={16} />
+            Sell
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, transaction_type: 'buy' })}
-              className={`py-3 rounded-xl border text-sm font-medium transition-all ${
-                form.transaction_type === 'buy'
-                  ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400'
-                  : 'bg-gray-800/50 border-gray-700/50 text-gray-400'
-              }`}
-            >
-              📈 Buy
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, transaction_type: 'sell' })}
-              className={`py-3 rounded-xl border text-sm font-medium transition-all ${
-                form.transaction_type === 'sell'
-                  ? 'bg-red-600/20 border-red-500 text-red-400'
-                  : 'bg-gray-800/50 border-gray-700/50 text-gray-400'
-              }`}
-            >
-              📉 Sell
-            </button>
-          </div>
-
-          <div>
-            <label className="text-gray-400 text-sm mb-1.5 block">Stock</label>
-            <input
+        <div>
+          <Field label="Stock">
+            <Input
               type="text"
               placeholder="Search by symbol or name..."
               value={search}
@@ -129,77 +115,74 @@ function AddTransactionModal({ onClose, onSuccess }) {
                 setSearch(e.target.value)
                 setForm({ ...form, stock_symbol: '' })
               }}
-              className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none text-sm placeholder-gray-600"
             />
-            {search.length >= 2 && filtered.length > 0 && !form.stock_symbol && (
-              <div className="mt-1 bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-                {filtered.map(s => (
-                  <button
-                    key={s.symbol}
-                    type="button"
-                    onClick={() => {
-                      setForm({ ...form, stock_symbol: s.symbol })
-                      setSearch(s.symbol)
-                    }}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition-colors text-left"
-                  >
-                    <span className="text-white font-medium text-sm">{s.symbol}</span>
-                    <span className="text-gray-400 text-xs truncate max-w-40">{s.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-            {form.stock_symbol && (
-              <p className="text-emerald-400 text-xs mt-1">✓ Selected: {form.stock_symbol}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-gray-400 text-sm mb-1.5 block">Shares</label>
-              <input
-                type="number"
-                value={form.shares}
-                onChange={(e) => setForm({ ...form, shares: e.target.value })}
-                className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none text-sm placeholder-gray-600"
-                placeholder="100"
-                required
-              />
+          </Field>
+          {search.length >= 2 && filtered.length > 0 && !form.stock_symbol && (
+            <div className="mt-1 bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+              {filtered.map(s => (
+                <button
+                  key={s.symbol}
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, stock_symbol: s.symbol })
+                    setSearch(s.symbol)
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition-colors text-left"
+                >
+                  <span className="text-white font-medium text-sm">{s.symbol}</span>
+                  <span className="text-ink-mid text-xs truncate max-w-40">{s.name}</span>
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="text-gray-400 text-sm mb-1.5 block">Price per share</label>
-              <input
-                type="number"
-                value={form.price_per_share}
-                onChange={(e) => setForm({ ...form, price_per_share: e.target.value })}
-                className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none text-sm placeholder-gray-600"
-                placeholder="250.00"
-                required
-              />
-            </div>
-          </div>
+          )}
+          {form.stock_symbol && (
+            <p className="text-brand-400 text-xs mt-1 flex items-center gap-1">
+              <Check size={12} /> Selected: {form.stock_symbol}
+            </p>
+          )}
+        </div>
 
-          <div>
-            <label className="text-gray-400 text-sm mb-1.5 block">Date</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none text-sm"
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Shares">
+            <Input
+              type="number"
+              value={form.shares}
+              onChange={(e) => setForm({ ...form, shares: e.target.value })}
+              placeholder="100"
               required
             />
-          </div>
+          </Field>
+          <Field label="Price per share">
+            <Input
+              type="number"
+              value={form.price_per_share}
+              onChange={(e) => setForm({ ...form, price_per_share: e.target.value })}
+              placeholder="250.00"
+              required
+            />
+          </Field>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading || !form.stock_symbol}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl py-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Adding...' : 'Add Transaction'}
-          </button>
-        </form>
-      </div>
-    </div>
+        <Field label="Date">
+          <Input
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            required
+          />
+        </Field>
+
+        <Button
+          type="submit"
+          loading={loading}
+          disabled={!form.stock_symbol}
+          className="w-full"
+          size="lg"
+        >
+          {loading ? 'Adding…' : 'Add Transaction'}
+        </Button>
+      </form>
+    </Modal>
   )
 }
 
@@ -283,19 +266,19 @@ function ImportModal({ onClose, onSuccess }) {
     }
   }
 
-  const cellCls = 'bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white w-full focus:outline-none focus:border-emerald-500'
+  const cellCls = 'bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white w-full focus:outline-none focus:border-brand-500'
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-3xl shadow-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-panel rounded-2xl border border-edge w-full max-w-3xl shadow-2xl max-h-[90vh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800 flex-shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-edge flex-shrink-0">
           <div>
             <h2 className="text-white font-semibold text-lg">Import Transactions</h2>
-            <p className="text-gray-500 text-xs mt-0.5">Upload a CSV, Excel, or screenshot from your broker</p>
+            <p className="text-ink-dim text-xs mt-0.5">Upload a CSV, Excel, or screenshot from your broker</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-ink-mid hover:text-white transition-colors" aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -308,20 +291,20 @@ function ImportModal({ onClose, onSuccess }) {
             <div className="space-y-4">
               <div
                 className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-colors ${
-                  dragging ? 'border-emerald-500 bg-emerald-500/5' : 'border-gray-700 hover:border-gray-600'
+                  dragging ? 'border-brand-500 bg-brand-500/5' : 'border-gray-700 hover:border-gray-600'
                 }`}
                 onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={handleDrop}
               >
-                <Upload size={32} className="mx-auto mb-3 text-gray-500" />
+                <Upload size={32} className="mx-auto mb-3 text-ink-dim" />
                 {file ? (
-                  <p className="text-emerald-400 font-medium text-sm">{file.name}</p>
+                  <p className="text-brand-400 font-medium text-sm">{file.name}</p>
                 ) : (
                   <>
                     <p className="text-white font-medium mb-1">Drop your file here or click to browse</p>
-                    <p className="text-gray-500 text-xs">CSV, Excel (.xlsx), or screenshot (.png / .jpg)</p>
+                    <p className="text-ink-dim text-xs">CSV, Excel (.xlsx), or screenshot (.png / .jpg)</p>
                   </>
                 )}
                 <input
@@ -339,36 +322,38 @@ function ImportModal({ onClose, onSuccess }) {
                 </div>
               )}
 
-              <div className="bg-gray-800/50 border border-gray-800 rounded-xl px-4 py-3 text-xs text-gray-500 space-y-1">
-                <p className="font-medium text-gray-400">Supported formats</p>
+              <div className="bg-gray-800/50 border border-edge rounded-xl px-4 py-3 text-xs text-ink-dim space-y-1">
+                <p className="font-medium text-ink-mid">Supported formats</p>
                 <p>CSV / Excel: any broker export — column names are detected automatically.</p>
                 <p>Screenshot: a photo or screenshot of a transaction table.</p>
               </div>
 
-              <button
+              <Button
                 onClick={handleParse}
-                disabled={!file || parsing}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-semibold rounded-xl py-3 transition-colors text-sm"
+                loading={parsing}
+                disabled={!file}
+                className="w-full"
+                size="lg"
               >
                 {parsing ? 'Parsing…' : 'Parse File'}
-              </button>
+              </Button>
 
               <div className="relative flex items-center gap-3">
-                <div className="flex-1 border-t border-gray-800" />
-                <span className="text-gray-600 text-xs">or</span>
-                <div className="flex-1 border-t border-gray-800" />
+                <div className="flex-1 border-t border-edge" />
+                <span className="text-ink-dim text-xs">or</span>
+                <div className="flex-1 border-t border-edge" />
               </div>
 
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => finqlabRef.current?.click()}
                 disabled={parsing}
-                className="w-full border border-gray-700 hover:border-gray-500 disabled:opacity-40 text-gray-300 hover:text-white font-semibold rounded-xl py-3 transition-colors text-sm flex items-center justify-center gap-2"
+                className="w-full"
+                size="lg"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
-                </svg>
+                <FileText size={16} className="text-ink-mid" />
                 Finqalab Cashbook (PDF)
-              </button>
+              </Button>
               <input
                 ref={finqlabRef}
                 type="file"
@@ -382,7 +367,7 @@ function ImportModal({ onClose, onSuccess }) {
           {/* ── Stage: preview ── */}
           {stage === 'preview' && (
             <div className="space-y-4">
-              <p className="text-gray-400 text-sm">
+              <p className="text-ink-mid text-sm">
                 Review and edit the detected transactions before importing.
                 {skipped.length > 0 && (
                   <span className="text-amber-400 ml-1">{skipped.length} row{skipped.length !== 1 ? 's' : ''} could not be parsed.</span>
@@ -390,23 +375,23 @@ function ImportModal({ onClose, onSuccess }) {
               </p>
 
               {rows.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-sm">
+                <div className="text-center py-8 text-ink-dim text-sm">
                   No importable rows remain. Remove bad rows from skipped or upload a different file.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-800">
+                <div className="overflow-x-auto rounded-xl border border-edge">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-gray-800 bg-gray-900">
-                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Symbol</th>
-                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Date</th>
-                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Type</th>
-                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Shares</th>
-                        <th className="px-3 py-2 text-left text-gray-500 font-medium uppercase tracking-wide">Price</th>
+                      <tr className="border-b border-edge bg-panel">
+                        <th className="px-3 py-2 text-left text-ink-dim font-medium uppercase tracking-wide">Symbol</th>
+                        <th className="px-3 py-2 text-left text-ink-dim font-medium uppercase tracking-wide">Date</th>
+                        <th className="px-3 py-2 text-left text-ink-dim font-medium uppercase tracking-wide">Type</th>
+                        <th className="px-3 py-2 text-left text-ink-dim font-medium uppercase tracking-wide">Shares</th>
+                        <th className="px-3 py-2 text-left text-ink-dim font-medium uppercase tracking-wide">Price</th>
                         <th className="px-3 py-2" />
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800">
+                    <tbody className="divide-y divide-edge">
                       {rows.map((row, i) => (
                         <tr key={i} className="hover:bg-gray-800/30">
                           <td className="px-3 py-2">
@@ -454,7 +439,7 @@ function ImportModal({ onClose, onSuccess }) {
                             />
                           </td>
                           <td className="px-3 py-2">
-                            <button onClick={() => removeRow(i)} className="text-gray-600 hover:text-red-400 transition-colors">
+                            <button onClick={() => removeRow(i)} className="text-ink-dim hover:text-red-400 transition-colors" aria-label="Remove row">
                               <X size={14} />
                             </button>
                           </td>
@@ -470,7 +455,7 @@ function ImportModal({ onClose, onSuccess }) {
                 <div>
                   <button
                     onClick={() => setShowSkipped(v => !v)}
-                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                    className="text-xs text-ink-dim hover:text-gray-300 transition-colors"
                   >
                     {showSkipped ? '▲ Hide' : '▼ Show'} {skipped.length} skipped row{skipped.length !== 1 ? 's' : ''}
                   </button>
@@ -497,9 +482,11 @@ function ImportModal({ onClose, onSuccess }) {
           {/* ── Stage: success ── */}
           {stage === 'success' && (
             <div className="text-center py-8">
-              <div className="text-5xl mb-4">✅</div>
+              <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 size={30} className="text-brand-400" />
+              </div>
               <h3 className="text-white font-semibold text-lg mb-2">Import complete</h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-ink-mid text-sm">
                 {createdCount} transaction{createdCount !== 1 ? 's' : ''} added to your portfolio.
               </p>
             </div>
@@ -508,31 +495,32 @@ function ImportModal({ onClose, onSuccess }) {
 
         {/* Footer */}
         {stage === 'preview' && (
-          <div className="flex items-center justify-between p-6 border-t border-gray-800 flex-shrink-0">
+          <div className="flex items-center justify-between p-6 border-t border-edge flex-shrink-0">
             <button
               onClick={() => { setStage('upload'); setError('') }}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-ink-mid hover:text-white transition-colors"
             >
               ← Back
             </button>
-            <button
+            <Button
               onClick={handleConfirm}
-              disabled={importing || rows.length === 0}
-              className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors"
+              loading={importing}
+              disabled={rows.length === 0}
             >
               {importing ? 'Importing…' : `Import ${rows.length} transaction${rows.length !== 1 ? 's' : ''}`}
-            </button>
+            </Button>
           </div>
         )}
 
         {stage === 'success' && (
-          <div className="p-6 border-t border-gray-800 flex-shrink-0">
-            <button
+          <div className="p-6 border-t border-edge flex-shrink-0">
+            <Button
               onClick={() => { onClose(); onSuccess() }}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl py-3 transition-colors text-sm"
+              className="w-full"
+              size="lg"
             >
               Done
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -573,96 +561,91 @@ export default function Portfolio() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-white text-2xl font-bold">Portfolio</h1>
-          <p className="text-gray-400 mt-1">Manage your transactions</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowImport(true)}
-            className="flex items-center gap-2 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-medium transition-colors text-sm"
-          >
-            <Upload size={16} />
-            Import
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
-          >
-            <Plus size={18} />
-            Add Transaction
-          </button>
-        </div>
-      </div>
+      <Seo title="Portfolio" noindex />
+      <PageHeader
+        title="Portfolio"
+        subtitle="Manage your transactions"
+        action={
+          <>
+            <Button variant="secondary" onClick={() => setShowImport(true)}>
+              <Upload size={16} />
+              Import
+            </Button>
+            <Button onClick={() => setShowModal(true)}>
+              <Plus size={18} />
+              Add Transaction
+            </Button>
+          </>
+        }
+      />
 
       {loading ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 animate-pulse">
+            <div key={i} className="bg-panel rounded-2xl p-6 border border-edge animate-pulse">
               <div className="h-5 bg-gray-800 rounded w-1/4 mb-2" />
               <div className="h-4 bg-gray-800 rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : transactions.length === 0 ? (
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-12 text-center">
-          <div className="text-5xl mb-4">📊</div>
-          <h3 className="text-white font-semibold mb-2">No transactions yet</h3>
-          <p className="text-gray-400 text-sm mb-6">Add your first buy or sell transaction</p>
-          <button
-            onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-          >
-            <Plus size={18} />
-            Add Transaction
-          </button>
-        </div>
+        <EmptyState
+          icon={BarChart2}
+          title="No transactions yet"
+          description="Add your first buy or sell transaction"
+          action={
+            <Button onClick={() => setShowModal(true)} size="lg">
+              <Plus size={18} />
+              Add Transaction
+            </Button>
+          }
+        />
       ) : (
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-800">
+        <div className="bg-panel/80 rounded-2xl border border-edge overflow-hidden">
+          <div className="px-5 sm:px-6 py-4 border-b border-edge">
             <h2 className="text-white font-semibold">Transaction History</h2>
           </div>
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-edge">
             {transactions.map((t) => (
-              <div key={t.id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-800/30 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    t.transaction_type === 'buy' ? 'bg-emerald-600/20' : 'bg-red-600/20'
-                  }`}>
-                    {t.transaction_type === 'buy'
-                      ? <TrendingUp size={18} className="text-emerald-400" />
-                      : <TrendingDown size={18} className="text-red-400" />
-                    }
+              <div key={t.id} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 hover:bg-gray-800/30 transition-colors">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  t.transaction_type === 'buy' ? 'bg-brand-600/20' : 'bg-red-600/20'
+                }`}>
+                  {t.transaction_type === 'buy'
+                    ? <TrendingUp size={18} className="text-brand-400" />
+                    : <TrendingDown size={18} className="text-red-400" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">{t.stock.split(' - ')[0]}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      t.transaction_type === 'buy'
+                        ? 'bg-brand-600/20 text-brand-400'
+                        : 'bg-red-600/20 text-red-400'
+                    }`}>
+                      {t.transaction_type.toUpperCase()}
+                    </span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-semibold">{t.stock.split(' - ')[0]}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        t.transaction_type === 'buy'
-                          ? 'bg-emerald-600/20 text-emerald-400'
-                          : 'bg-red-600/20 text-red-400'
-                      }`}>
-                        {t.transaction_type.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="text-gray-400 text-sm">
-                      {t.shares} shares @ Rs. {t.price_per_share} • {t.date}
-                    </div>
+                  <div className="text-ink-mid text-sm truncate font-mono tabular-nums">
+                    {t.shares} @ Rs. {t.price_per_share} <span className="font-sans">• {t.date}</span>
+                  </div>
+                  {/* Mobile: total sits under the details so nothing clips off-screen */}
+                  <div className="sm:hidden text-white text-sm font-medium font-mono tabular-nums mt-0.5">
+                    Rs. {t.total_value?.toLocaleString()}
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-white font-medium">Rs. {t.total_value?.toLocaleString()}</div>
-                    <div className="text-gray-500 text-xs">Total value</div>
-                  </div>
-                  <button
-                    onClick={() => setConfirmId(t.id)}
-                    className="text-gray-600 hover:text-red-400 transition-colors p-1"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className="hidden sm:block text-right shrink-0">
+                  <div className="text-white font-medium font-mono tabular-nums whitespace-nowrap">Rs. {t.total_value?.toLocaleString()}</div>
+                  <div className="text-ink-dim text-xs">Total value</div>
                 </div>
+                <button
+                  onClick={() => setConfirmId(t.id)}
+                  className="text-ink-dim hover:text-red-400 transition-colors p-1 shrink-0"
+                  aria-label="Delete transaction"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
           </div>

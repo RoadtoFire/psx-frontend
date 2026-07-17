@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { login, getProfile, googleAuth } from '../api/auth'
 import { useAuth } from '../context/useAuth'
+import { AuthCard, Field, Input, Button } from '../components/ui'
+import Seo from '../components/Seo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -44,149 +46,77 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 overflow-hidden relative">
-
-      {/* Animated background blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500 rounded-full filter blur-3xl opacity-30 animate-blob" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-400 rounded-full filter blur-3xl opacity-25 animate-blob animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-teal-500 rounded-full filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-      </div>
-
-      {/* Subtle grid overlay */}
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '40px 40px'
-        }}
+    <AuthCard
+      title="Welcome back"
+      subtitle="Sign in to your Shariah-compliant portfolio"
+      footer={<span className="text-ink-dim text-xs">Pakistan Stock Exchange • Shariah Compliant Stocks Only</span>}
+    >
+      <Seo
+        title="Sign in"
+        description="Sign in to Amanat — the free Shariah-compliant PSX portfolio tracker for Pakistani investors."
+        path="/login"
       />
-
-      <div className="w-full max-w-md relative z-10">
-
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-white text-2xl font-bold tracking-tight"
-              style={{ fontFamily: 'Inter, sans-serif' }}>
-              Amanat
-            </span>
-            <div className="w-px h-6 bg-gray-600" />
-            <span className="text-emerald-400 text-2xl font-bold"
-              style={{ fontFamily: 'Noto Nastaliq Urdu, serif' }}>
-              امانت
-            </span>
-          </div>
-          <p className="text-gray-400 text-sm mt-2">Shariah Compliant Portfolio Tracker</p>
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 mb-4 text-sm">
+          {error}
         </div>
+      )}
 
-        {/* Card */}
-        <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-800/50 shadow-2xl">
-          <h2 className="text-white text-xl font-semibold mb-6">Welcome back</h2>
-
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 mb-4 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Google sign-in */}
-          <div className="flex justify-center mb-5">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google sign-in failed. Please try again.')}
-              theme="filled_black"
-              shape="rectangular"
-              text="signin_with"
-              width="320"
-            />
-          </div>
-
-          <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-gray-800" />
-            <span className="text-gray-600 text-xs">or continue with email</span>
-            <div className="flex-1 h-px bg-gray-800" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-gray-400 text-sm mb-1.5 block">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder-gray-600"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-gray-400 text-sm">Password</label>
-                <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-400 text-xs transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-gray-800/50 text-white rounded-xl px-4 py-3 border border-gray-700/50 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder-gray-600"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl px-4 py-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/30 mt-2"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : 'Sign in'}
-            </button>
-          </form>
-
-          <p className="text-gray-500 text-sm text-center mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-emerald-400 hover:text-emerald-300 transition-colors">
-              Create one
-            </Link>
-          </p>
-        </div>
-
-        <p className="text-gray-600 text-xs text-center mt-6">
-          Pakistan Stock Exchange • Shariah Compliant Stocks Only
-        </p>
+      <div className="flex justify-center mb-5">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Google sign-in failed. Please try again.')}
+          theme="filled_black"
+          shape="rectangular"
+          text="signin_with"
+          width="320"
+        />
       </div>
 
-      {/* Blob animation styles */}
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob { animation: blob 8s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-      `}</style>
-    </div>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex-1 h-px bg-gray-800" />
+        <span className="text-ink-dim text-xs">or continue with email</span>
+        <div className="flex-1 h-px bg-gray-800" />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Email">
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+          />
+        </Field>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-medium text-ink-mid uppercase tracking-wider">Password</label>
+            <Link to="/forgot-password" className="text-brand-500 hover:text-brand-400 text-xs transition-colors">
+              Forgot password?
+            </Link>
+          </div>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <Button type="submit" loading={loading} className="w-full mt-2" size="lg">
+          {loading ? 'Signing in…' : 'Sign in'}
+        </Button>
+      </form>
+
+      <p className="text-ink-dim text-sm text-center mt-6">
+        Don't have an account?{' '}
+        <Link to="/register" className="text-brand-400 hover:text-brand-light transition-colors">
+          Create one
+        </Link>
+      </p>
+    </AuthCard>
   )
 }

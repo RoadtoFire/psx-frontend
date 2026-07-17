@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Hourglass } from 'lucide-react'
 import api from '../api/axios'
 import { setForwardPE } from '../api/macro'
+import { PageHeader, Button, SignalBadge } from '../components/ui'
+import Seo from '../components/Seo'
 
 const JOB_META = {
   update_prices: {
@@ -34,25 +37,10 @@ function timeAgo(dateStr) {
 }
 
 function StatusPill({ success }) {
-  if (success === null) {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-        No data yet
-      </span>
-    )
-  }
-  return success ? (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-      OK
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
-      <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-      Failed
-    </span>
-  )
+  if (success === null) return <SignalBadge signal="YELLOW" label="No data yet" />
+  return success
+    ? <SignalBadge signal="GREEN" label="OK" />
+    : <SignalBadge signal="RED" label="Failed" />
 }
 
 function JobCard({ jobName, lastRun }) {
@@ -203,17 +191,13 @@ function ForwardPEPanel() {
           onChange={e => { setPe(e.target.value); setError('') }}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="e.g. 7.2"
-          className="bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm font-mono w-36 focus:outline-none focus:border-emerald-600 tabular-nums"
+          className="bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white text-sm font-mono w-36 focus:outline-none focus:border-brand-500 tabular-nums"
         />
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
-        >
+        <Button onClick={handleSave} loading={saving}>
           {saving ? 'Saving…' : 'Save'}
-        </button>
+        </Button>
         {saved && (
-          <span className="text-emerald-400 text-sm font-medium">Saved</span>
+          <span className="text-brand-400 text-sm font-medium">Saved</span>
         )}
       </div>
       {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
@@ -255,18 +239,17 @@ export default function Admin() {
 
   return (
     <div className="max-w-5xl mx-auto" key={now}>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-white text-2xl font-bold">Scrape Monitor</h1>
-          <p className="text-gray-400 mt-1 text-sm">Last 30 cron runs across all three jobs</p>
-        </div>
-        <button
-          onClick={fetchLogs}
-          className="text-xs text-gray-500 hover:text-gray-300 border border-gray-800 rounded-lg px-3 py-1.5 transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
+      <Seo title="Scrape Monitor" noindex />
+      <PageHeader
+        title="Scrape Monitor"
+        subtitle="Last 30 cron runs across all three jobs"
+        className="mb-6"
+        action={
+          <Button variant="secondary" size="sm" onClick={fetchLogs}>
+            Refresh
+          </Button>
+        }
+      />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 mb-6 text-sm">
@@ -323,7 +306,7 @@ export default function Admin() {
 
       {!loading && logs.length === 0 && !error && (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">⏳</div>
+          <Hourglass size={36} className="mx-auto mb-3 text-ink-dim" />
           <p>No cron runs recorded yet.</p>
           <p className="text-sm mt-1 text-gray-600">Trigger a cron job to see its log here.</p>
         </div>

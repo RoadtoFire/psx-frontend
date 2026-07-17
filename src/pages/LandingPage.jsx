@@ -1,8 +1,24 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { TrendingUp, HandCoins, Moon, Sparkles, Smartphone, BookOpen } from "lucide-react";
+import { Logo } from "../components/ui";
+import Seo from "../components/Seo";
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Amanat",
+  alternateName: "امانت",
+  url: "https://amanat-psx.com",
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "PKR" },
+  description:
+    "Free Shariah-compliant portfolio tracker for the Pakistan Stock Exchange. Track holdings, dividends, withholding tax, and purification across 285 KMI-compliant stocks.",
+  inLanguage: ["en", "ur"],
+};
 
 export default function LandingPage() {
-  const navigate = useNavigate();
   const heroRef = useRef(null);
 
   useEffect(() => {
@@ -22,6 +38,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-slate-200 overflow-x-hidden">
+      <Seo
+        description="Free Shariah-compliant PSX portfolio tracker for Pakistani investors. Track your holdings, dividends, tax, and purification across 285 KMI-compliant stocks — built for the Pakistan Stock Exchange."
+        path="/"
+        jsonLd={JSON_LD}
+      />
       <style>{`
         .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
@@ -52,27 +73,28 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-950/95 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-brand rounded-lg flex items-center justify-center text-white font-semibold text-base">
-            A
-          </div>
-          <span className="text-lg font-medium text-slate-100">
-            Amanat <span className="text-emerald-400 text-sm">| امانت</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate("/login")}
+        <Link to="/" aria-label="Amanat home">
+          <Logo />
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/learn"
+            className="text-slate-400 text-sm hover:text-slate-200 transition-colors hidden sm:block"
+          >
+            Learn
+          </Link>
+          <Link
+            to="/login"
             className="text-slate-400 text-sm hover:text-slate-200 transition-colors hidden sm:block"
           >
             Sign in
-          </button>
-          <button
-            onClick={() => navigate("/register")}
+          </Link>
+          <Link
+            to="/register"
             className="bg-brand hover:bg-brand-hover text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
           >
             Get Started
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -96,12 +118,12 @@ export default function LandingPage() {
         </p>
 
         <div className="fade-in fade-in-delay-3 flex gap-3 justify-center flex-wrap">
-          <button
-            onClick={() => navigate("/register")}
+          <Link
+            to="/register"
             className="bg-brand hover:bg-brand-hover text-white px-7 py-3 rounded-xl text-base font-medium transition-colors"
           >
             Start tracking free
-          </button>
+          </Link>
           <button
             onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
             className="bg-transparent text-slate-200 px-7 py-3 rounded-xl text-base border border-white/20 hover:border-white/40 transition-colors"
@@ -148,37 +170,37 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
-              icon: "📈",
+              icon: TrendingUp,
               title: "Live PSX prices",
               desc: "Real-time stock prices scraped directly from the Pakistan Stock Exchange, updated throughout the trading day.",
               delay: 0,
             },
             {
-              icon: "💰",
+              icon: HandCoins,
               title: "Dividend tracking",
               desc: "Automatic dividend calculations with tax deductions included. Know exactly what you'll receive — before and after tax.",
               delay: 1,
             },
             {
-              icon: "🌙",
+              icon: Moon,
               title: "Shariah compliance",
               desc: "Every stock screened against all 6 KMI criteria. Invest with confidence knowing your portfolio stays halal.",
               delay: 2,
             },
             {
-              icon: "✦",
+              icon: Sparkles,
               title: "Auto purification",
               desc: "Purification amounts calculated automatically from Al-Meezan's semi-annual KMI reports. Giving made effortless.",
               delay: 3,
             },
             {
-              icon: "📱",
+              icon: Smartphone,
               title: "Mobile first",
               desc: "Designed for your phone. Install as a PWA and track your portfolio anytime, anywhere — no app store needed.",
               delay: 4,
             },
             {
-              icon: "📚",
+              icon: BookOpen,
               title: "Learn as you invest",
               desc: "Built-in educational content explains Shariah investing basics and stock market fundamentals in plain Urdu and English.",
               delay: 5,
@@ -188,8 +210,8 @@ export default function LandingPage() {
               key={i}
               className={`fade-in fade-in-delay-${Math.min(f.delay, 5)} feature-card bg-gray-900 border border-gray-800 rounded-2xl p-6`}
             >
-              <div className="feature-icon-wrap w-11 h-11 bg-emerald-600/10 rounded-xl flex items-center justify-center text-lg mb-4 transition-colors">
-                {f.icon}
+              <div className="feature-icon-wrap w-11 h-11 bg-emerald-600/10 rounded-xl flex items-center justify-center text-emerald-400 mb-4 transition-colors">
+                <f.icon size={20} />
               </div>
               <h3 className="text-base font-medium text-slate-200 mb-2">
                 {f.title}
@@ -323,20 +345,27 @@ export default function LandingPage() {
             Join Pakistani investors already using Amanat to build a halal
             portfolio with confidence.
           </p>
-          <button
-            onClick={() => navigate("/register")}
-            className="bg-brand hover:bg-brand-hover text-white px-8 py-3 rounded-xl text-base font-medium transition-colors"
+          <Link
+            to="/register"
+            className="inline-block bg-brand hover:bg-brand-hover text-white px-8 py-3 rounded-xl text-base font-medium transition-colors"
           >
             Create free account
-          </button>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-5 px-6 text-center text-gray-600 text-xs">
-        Built for Pakistan, with{" "}
-        <span className="text-emerald-400">امانت</span> — Amanat PSX &copy;{" "}
-        {new Date().getFullYear()}
+      <footer className="border-t border-gray-800 py-6 px-6 text-center text-gray-600 text-xs space-y-3">
+        <div className="flex items-center justify-center gap-5">
+          <Link to="/learn" className="hover:text-slate-300 transition-colors">Learn Shariah Investing</Link>
+          <Link to="/login" className="hover:text-slate-300 transition-colors">Sign in</Link>
+          <Link to="/register" className="hover:text-slate-300 transition-colors">Create account</Link>
+        </div>
+        <div>
+          Built for Pakistan, with{" "}
+          <span className="text-emerald-400 font-urdu">امانت</span> — Amanat PSX &copy;{" "}
+          {new Date().getFullYear()}
+        </div>
       </footer>
     </div>
   );

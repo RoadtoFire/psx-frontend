@@ -16,6 +16,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
 import Macro from './pages/Macro'
+import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import { useAuth } from './context/useAuth'
 
@@ -61,10 +62,11 @@ function App() {
             <Stocks />
           </ProtectedRoute>
         } />
+        {/* Public: indexable Shariah education content; Layout shows a sign-in CTA when logged out */}
         <Route path="/learn" element={
-          <ProtectedRoute>
+          <Layout>
             <Learn />
-          </ProtectedRoute>
+          </Layout>
         } />
         <Route path="/profile" element={
           <ProtectedRoute>
@@ -81,7 +83,8 @@ function App() {
             <Admin />
           </AdminRoute>
         } />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

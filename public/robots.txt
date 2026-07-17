@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /portfolio
+Disallow: /dividends
+Disallow: /stocks
+Disallow: /macro
+Disallow: /profile
+Disallow: /admin
+Disallow: /reset-password
+
+Sitemap: https://amanat-psx.com/sitemap.xml

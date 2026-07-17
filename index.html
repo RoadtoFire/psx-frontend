@@ -14,15 +14,29 @@
     <meta name="apple-mobile-web-app-title" content="Amanat" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fonts: preconnect + swap; Noto Nastaliq subset to the one word it renders -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&text=%D8%A7%D9%85%D8%A7%D9%86%D8%AA&display=swap" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
 
-    <!-- SEO -->
-    <meta name="description" content="Shariah-compliant PSX portfolio tracker for Pakistani investors. Track dividends, purification, and more." />
+    <!-- SEO defaults — per-route pages override via React 19 document metadata -->
+    <meta name="description" content="Free Shariah-compliant PSX portfolio tracker for Pakistani investors. Track your holdings, dividends, tax, and purification across 285 KMI-compliant stocks." />
+    <meta property="og:site_name" content="Amanat | امانت" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Amanat | امانت" />
+    <meta property="og:description" content="Free Shariah-compliant PSX portfolio tracker for Pakistani investors." />
+    <meta property="og:url" content="https://amanat-psx.com/" />
+    <meta property="og:image" content="https://amanat-psx.com/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Amanat | امانت" />
+    <meta name="twitter:description" content="Free Shariah-compliant PSX portfolio tracker for Pakistani investors." />
+    <meta name="twitter:image" content="https://amanat-psx.com/og-image.png" />
 
     <title>Amanat | امانت</title>
   </head>
@@ -31,5 +45,3 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-
-

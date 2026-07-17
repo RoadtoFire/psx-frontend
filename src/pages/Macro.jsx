@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Info } from 'lucide-react'
 import { getMacroData } from '../api/macro'
+import { PageHeader, Button, Tooltip, SIG } from '../components/ui'
+import Seo from '../components/Seo'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -25,23 +28,12 @@ function timeAgo(date) {
 
 // ── Signal config ──────────────────────────────────────────────────────────
 
-const SIG = {
-  GREEN: {
-    text: 'text-emerald-400', dot: 'bg-emerald-400',
-    topColor: '#10b981', cardBorder: 'border-emerald-500/15', label: 'Green',
-  },
-  YELLOW: {
-    text: 'text-amber-400', dot: 'bg-amber-400',
-    topColor: '#f59e0b', cardBorder: 'border-amber-500/15', label: 'Yellow',
-  },
-  RED: {
-    text: 'text-red-400', dot: 'bg-red-400',
-    topColor: '#f43f5e', cardBorder: 'border-red-500/15', label: 'Red',
-  },
-  UNKNOWN: {
-    text: 'text-gray-500', dot: 'bg-gray-600',
-    topColor: '#374151', cardBorder: 'border-gray-800', label: 'Unknown',
-  },
+// Static class map for the ERP hero border — template-literal Tailwind classes
+// are invisible to the compiler and must never be built dynamically.
+const ERP_HERO_BORDER = {
+  GREEN: 'border-emerald-500/20',
+  YELLOW: 'border-amber-500/20',
+  RED: 'border-red-500/20',
 }
 
 const ERP_BADGE = {
@@ -59,31 +51,6 @@ const COMPOSITE_DESC = {
   PEAK_STRESS:'All three macro indicators are red. Historically a high-stress environment for Pakistani equities. Preserve capital.',
 }
 const COMPOSITE_SIG = { CALM: 'GREEN', WATCH: 'YELLOW', STRESSED: 'RED', PEAK_STRESS: 'RED' }
-
-// ── Tooltip ────────────────────────────────────────────────────────────────
-
-function Tooltip({ label, children, align = 'center', width = 'w-60' }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <span
-      className="relative inline-flex items-center gap-1.5 uppercase tracking-[.06em] font-semibold cursor-default select-none"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      {label}
-      <span className={`w-4 h-4 rounded-full border text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0 transition-colors ${
-        open ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-500'
-      }`}>?</span>
-      {open && (
-        <div className={`absolute bottom-full mb-2 ${width} bg-[#1a2640] border border-gray-700 rounded-xl px-3 py-3 text-xs text-gray-300 leading-relaxed z-50 shadow-2xl normal-case tracking-normal font-normal whitespace-normal text-left pointer-events-none ${
-          align === 'right' ? 'right-0' : align === 'left' ? 'left-0' : 'left-1/2 -translate-x-1/2'
-        }`}>
-          {children}
-        </div>
-      )}
-    </span>
-  )
-}
 
 // ── Warning Card ───────────────────────────────────────────────────────────
 
@@ -165,11 +132,12 @@ export default function Macro() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <Seo title="Macro Climate" noindex />
 
       {/* ── Disclaimer ── */}
       <div className="flex gap-4 bg-emerald-500/[0.06] border border-emerald-500/20 rounded-2xl p-5">
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm mt-0.5">
-          ℹ
+        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mt-0.5">
+          <Info size={14} />
         </div>
         <div className="text-sm text-gray-400 leading-relaxed">
           <strong className="text-white font-semibold block mb-1">Market context, not investment advice</strong>
@@ -178,22 +146,16 @@ export default function Macro() {
       </div>
 
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-white text-2xl font-bold">Macro Climate</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Pakistan equity risk indicators
-            {refreshedAt && <> · Updated {timeAgo(refreshedAt)}</>}
-          </p>
-        </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="flex-shrink-0 text-xs text-gray-500 hover:text-gray-300 border border-gray-800 hover:border-gray-700 rounded-xl px-4 py-2 transition-colors disabled:opacity-40"
-        >
-          {loading ? 'Loading…' : 'Refresh'}
-        </button>
-      </div>
+      <PageHeader
+        title="Macro Climate"
+        subtitle={<>Pakistan equity risk indicators{refreshedAt && <> · Updated {timeAgo(refreshedAt)}</>}</>}
+        className="mb-0"
+        action={
+          <Button variant="secondary" size="sm" onClick={load} disabled={loading}>
+            {loading ? 'Loading…' : 'Refresh'}
+          </Button>
+        }
+      />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
@@ -221,7 +183,7 @@ export default function Macro() {
           <section>
             <p className="text-xs font-semibold uppercase tracking-[.10em] text-gray-600 mb-3">Equity Risk Signal</p>
             <div
-              className={`relative bg-gray-900/60 border ${snap?.erp_signal ? `border-${snap.erp_signal === 'GREEN' ? 'emerald' : snap.erp_signal === 'RED' ? 'red' : 'amber'}-500/20` : 'border-gray-800'} rounded-2xl p-7`}
+              className={`relative bg-gray-900/60 border ${ERP_HERO_BORDER[snap?.erp_signal] || 'border-gray-800'} rounded-2xl p-7`}
               style={{ overflow: 'visible', boxShadow: 'inset 0 0 120px rgba(245,158,11,0.03)' }}
             >
               <div

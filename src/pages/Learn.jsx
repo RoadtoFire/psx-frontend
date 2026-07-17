@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { ChevronDown, ChevronUp, ExternalLink, Landmark, Moon, TrendingUp, MonitorPlay } from 'lucide-react'
+import { PageHeader, Card, Tabs, Badge } from '../components/ui'
+import Seo from '../components/Seo'
 
 const shariah_criteria = [
   {
@@ -63,15 +65,15 @@ function CriteriaCard({ item }) {
 
   return (
     <div
-      className={`rounded-2xl border ${item.border} ${item.bg} p-5 cursor-pointer transition-all`}
+      className={`rounded-2xl border ${item.border} ${item.bg} p-5 cursor-pointer transition-all hover:brightness-110`}
       onClick={() => setOpen(!open)}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <span className={`text-2xl font-black ${item.color} shrink-0`}>{item.number}</span>
+          <span className={`text-2xl font-black font-mono ${item.color} shrink-0`}>{item.number}</span>
           <div>
             <div className="text-white font-semibold">{item.title}</div>
-            <div className="text-gray-400 text-sm mt-1">{item.short}</div>
+            <div className="text-ink-mid text-sm mt-1">{item.short}</div>
             {open && (
               <div className="text-gray-300 text-sm mt-3 leading-relaxed border-t border-gray-700 pt-3">
                 {item.detail}
@@ -87,65 +89,79 @@ function CriteriaCard({ item }) {
   )
 }
 
+function IconChip({ icon: Icon, className }) {
+  return (
+    <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${className}`}>
+      <Icon size={22} />
+    </div>
+  )
+}
+
+const FAQ_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    ...shariah_criteria.map((c) => ({
+      '@type': 'Question',
+      name: `Shariah screening: ${c.title}`,
+      acceptedAnswer: { '@type': 'Answer', text: c.detail },
+    })),
+    {
+      '@type': 'Question',
+      name: 'What is dividend purification in Islamic investing?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Even Shariah-compliant companies may earn a small amount of non-compliant income (under 5%). When you receive dividends, you must donate the equivalent proportion to charity. Amanat calculates this automatically based on the purification ratios published by Al-Meezan in their semi-annual KMI recomposition reports.',
+      },
+    },
+  ],
+}
+
 export default function Learn() {
   const [activeTab, setActiveTab] = useState('shariah')
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-white text-2xl font-bold">Learn</h1>
-        <p className="text-gray-400 mt-1">Understand Shariah investing and stock market basics</p>
-      </div>
+      <Seo
+        title="Learn Shariah Investing on PSX"
+        description="How Shariah-compliant stock screening works on the Pakistan Stock Exchange: the 6 KMI criteria, dividend purification, withholding tax, and investing basics — explained simply."
+        path="/learn"
+        jsonLd={FAQ_JSON_LD}
+      />
+      <PageHeader
+        title="Learn"
+        subtitle="Understand Shariah investing and stock market basics"
+      />
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-8">
-        <button
-          onClick={() => setActiveTab('shariah')}
-          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            activeTab === 'shariah'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-gray-800 text-gray-400 hover:text-white'
-          }`}
-        >
-          🕌 Shariah Compliance
-        </button>
-        <button
-          onClick={() => setActiveTab('investing')}
-          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            activeTab === 'investing'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-gray-800 text-gray-400 hover:text-white'
-          }`}
-        >
-          📈 Investing Basics
-        </button>
-      </div>
+      <Tabs
+        className="mb-8"
+        active={activeTab}
+        onChange={setActiveTab}
+        tabs={[
+          { value: 'shariah', label: 'Shariah Compliance' },
+          { value: 'investing', label: 'Investing Basics' },
+        ]}
+      />
 
-      {/* Shariah tab */}
       {activeTab === 'shariah' && (
         <div className="space-y-4">
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-800 p-6 mb-6">
+          <Card className="mb-6">
             <div className="flex items-start gap-4">
-              <div className="text-3xl">🕌</div>
+              <IconChip icon={Landmark} className="bg-brand-600/15 text-brand-400 border-brand-600/20" />
               <div>
                 <h2 className="text-white font-bold text-lg mb-2">What makes a stock Shariah compliant?</h2>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-ink-mid text-sm leading-relaxed">
                   The KMI All Shares Islamic Index is developed by PSX and Meezan Bank. A stock must pass
                   all 6 criteria below to be included. The index is reviewed every 6 months — stocks that
                   no longer qualify are removed.
                 </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-xs bg-emerald-600/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-600/20">
-                    285 compliant stocks on PSX
-                  </span>
-                  <span className="text-xs bg-gray-800 text-gray-400 px-3 py-1 rounded-full">
-                    Reviewed every 6 months
-                  </span>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge tone="brand">285 compliant stocks on PSX</Badge>
+                  <Badge tone="gray">Reviewed every 6 months</Badge>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {shariah_criteria.map((item) => (
             <CriteriaCard key={item.number} item={item} />
@@ -154,15 +170,15 @@ export default function Learn() {
           {/* Purification explainer */}
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 mt-6">
             <div className="flex items-start gap-4">
-              <div className="text-3xl">🌙</div>
+              <IconChip icon={Moon} className="bg-amber-500/15 text-amber-400 border-amber-500/20" />
               <div>
                 <h3 className="text-white font-bold mb-2">What is Purification?</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-ink-mid text-sm leading-relaxed">
                   Even Shariah-compliant companies may earn a small amount of non-compliant income
                   (under 5%). When you receive dividends, you must donate the equivalent proportion
                   to charity. This is called <span className="text-amber-400 font-medium">purification (تطهير)</span>.
                 </p>
-                <p className="text-gray-400 text-sm leading-relaxed mt-2">
+                <p className="text-ink-mid text-sm leading-relaxed mt-2">
                   Amanat calculates this automatically for every dividend you receive based on
                   the purification ratios published by Al-Meezan in their semi-annual KMI recomposition reports.
                 </p>
@@ -172,56 +188,51 @@ export default function Learn() {
         </div>
       )}
 
-      {/* Investing tab */}
       {activeTab === 'investing' && (
         <div className="space-y-6">
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-800 p-6">
+          <Card>
             <div className="flex items-start gap-4">
-              <div className="text-3xl">📺</div>
+              <IconChip icon={MonitorPlay} className="bg-red-500/15 text-red-400 border-red-500/20" />
               <div>
                 <h2 className="text-white font-bold text-lg mb-2">Investkaar — Learn to Invest in Urdu</h2>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-ink-mid text-sm leading-relaxed">
                   The best Pakistani YouTube channel for learning stock market investing from scratch.
                   All videos are in Urdu and specifically cover the Pakistan Stock Exchange.
                 </p>
-                
-                <a 
+
+                <a
                   href="https://www.youtube.com/playlist?list=PLgaVB1A1vB-21-v7CHJuOduGv-HZzwTSd"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-3 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-2 mt-3 text-brand-400 hover:text-brand-light text-sm font-medium transition-colors"
                 >
                   View full playlist on YouTube
                   <ExternalLink size={14} />
                 </a>
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* Featured video */}
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-800 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-800">
-              <h3 className="text-white font-semibold">Start Here</h3>
+          <Card title="Start Here" bodyClassName="p-4">
+            <div className="rounded-xl overflow-hidden">
+              <iframe
+                width="100%"
+                height="315"
+                src="https://www.youtube.com/embed/l2Gb7vOgGug"
+                title="Introduction to Stock Market - Investkaar"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full"
+              />
             </div>
-            <div className="p-4">
-              <div className="rounded-xl overflow-hidden">
-                <iframe
-                  width="100%"
-                  height="315"
-                  src="https://www.youtube.com/embed/l2Gb7vOgGug"
-                  title="Introduction to Stock Market - Investkaar"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
+          </Card>
 
-          {/* Quick concepts */}
-          <div className="bg-gray-900/80 rounded-2xl border border-gray-800 p-6">
-            <h3 className="text-white font-semibold mb-4">Key Concepts</h3>
+          <Card>
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <TrendingUp size={18} className="text-brand-400" />
+              Key Concepts
+            </h3>
             <div className="space-y-3">
               {[
                 { term: 'KMI All Shares Index', def: 'The benchmark index for Shariah compliant stocks on PSX. Contains ~285 stocks screened by Meezan Bank.' },
@@ -231,13 +242,13 @@ export default function Learn() {
                 { term: 'Right Shares', def: 'New shares offered to existing shareholders at a discounted price to raise capital.' },
                 { term: 'Withholding Tax', def: 'Tax deducted at source on dividends. 15% for filers, 30% for non-filers.' },
               ].map((c) => (
-                <div key={c.term} className="flex gap-4 py-3 border-b border-gray-800 last:border-0">
-                  <div className="text-emerald-400 font-semibold text-sm shrink-0 w-48">{c.term}</div>
-                  <div className="text-gray-400 text-sm">{c.def}</div>
+                <div key={c.term} className="flex flex-col sm:flex-row gap-1 sm:gap-4 py-3 border-b border-edge last:border-0">
+                  <div className="text-brand-400 font-semibold text-sm shrink-0 sm:w-48">{c.term}</div>
+                  <div className="text-ink-mid text-sm">{c.def}</div>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>
