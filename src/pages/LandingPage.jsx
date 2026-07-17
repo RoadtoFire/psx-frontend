@@ -9,7 +9,7 @@ const JSON_LD = {
   "@type": "WebApplication",
   name: "Amanat",
   alternateName: "امانت",
-  url: "https://amanat-psx.com",
+  url: "https://www.amanat-psx.com",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Web",
   offers: { "@type": "Offer", price: "0", priceCurrency: "PKR" },

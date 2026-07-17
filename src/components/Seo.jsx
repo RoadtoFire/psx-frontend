@@ -1,4 +1,4 @@
-const SITE = 'https://amanat-psx.com'
+const SITE = 'https://www.amanat-psx.com'
 const DEFAULT_IMAGE = `${SITE}/og-image.png`
 const SITE_NAME = 'Amanat | امانت'
 

@@ -9,4 +9,4 @@ Disallow: /profile
 Disallow: /admin
 Disallow: /reset-password
 
-Sitemap: https://amanat-psx.com/sitemap.xml
+Sitemap: https://www.amanat-psx.com/sitemap.xml

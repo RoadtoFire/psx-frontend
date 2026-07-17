@@ -40,8 +40,33 @@ const STRIP_SELECTORS = [
   'script[src*="/_vercel/insights"]',
 ]
 
+// Full puppeteer's bundled Chromium can't run on Vercel's build image (missing
+// system libraries), so fall back to @sparticuz/chromium (statically linked,
+// built for serverless Linux) with puppeteer-core.
+async function launchBrowser() {
+  try {
+    const { default: puppeteer } = await import('puppeteer')
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+    console.log('prerender: using full puppeteer')
+    return browser
+  } catch (err) {
+    console.warn(`prerender: full puppeteer unavailable (${err.message.split('\n')[0]}); trying @sparticuz/chromium`)
+    const { default: chromium } = await import('@sparticuz/chromium')
+    const { default: puppeteerCore } = await import('puppeteer-core')
+    const browser = await puppeteerCore.launch({
+      executablePath: await chromium.executablePath(),
+      args: [...chromium.args, '--no-sandbox'],
+      headless: true,
+    })
+    console.log('prerender: using @sparticuz/chromium')
+    return browser
+  }
+}
+
 async function main() {
-  const { default: puppeteer } = await import('puppeteer')
 
   const preview = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
     stdio: 'ignore',
@@ -62,10 +87,7 @@ async function main() {
   }
   if (!up) throw new Error('vite preview did not start')
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  })
+  const browser = await launchBrowser()
 
   try {
     for (const [route, outFile] of Object.entries(ROUTES)) {
