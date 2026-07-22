@@ -9,6 +9,7 @@ import {
   BookOpen,
   ShieldCheck,
   Globe,
+  Newspaper,
   User,
   LogOut,
   LogIn,
@@ -25,6 +26,7 @@ const navItems = [
   { path: '/stocks', icon: ShieldCheck, label: 'Stocks' },
   { path: '/macro', icon: Globe, label: 'Macro' },
   { path: '/learn', icon: BookOpen, label: 'Learn' },
+  { path: '/blog', icon: Newspaper, label: 'Blog' },
 ]
 
 function NavLink({ path, icon: Icon, label, active, onClick, mobile = false }) {

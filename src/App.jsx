@@ -16,6 +16,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
 import Macro from './pages/Macro'
+import BlogList from './pages/BlogList'
+import BlogPost from './pages/BlogPost'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import { useAuth } from './context/useAuth'
@@ -66,6 +68,16 @@ function App() {
         <Route path="/learn" element={
           <Layout>
             <Learn />
+          </Layout>
+        } />
+        <Route path="/blog" element={
+          <Layout>
+            <BlogList />
+          </Layout>
+        } />
+        <Route path="/blog/:slug" element={
+          <Layout>
+            <BlogPost />
           </Layout>
         } />
         <Route path="/profile" element={
