@@ -27,6 +27,7 @@ const ROUTES = {
   '/register': 'register/index.html',
   '/forgot-password': 'forgot-password/index.html',
   '/learn': 'learn/index.html',
+  '/blog': 'blog/index.html',
   '/not-found': '404.html',
   '/': 'index.html',
 }
